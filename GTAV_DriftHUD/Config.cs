@@ -116,7 +116,6 @@ namespace GTAV_DriftHUD
             }
         }
 
-
         /// <summary>
         /// Gets a config setting
         /// </summary>
@@ -154,7 +153,6 @@ namespace GTAV_DriftHUD
             }
             else
                 throw new ArgumentException("Not a known type.");
-
         }
     }
 }

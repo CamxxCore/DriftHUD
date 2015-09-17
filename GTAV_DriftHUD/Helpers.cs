@@ -2,7 +2,7 @@
 using System.IO;
 
 public static class Helpers
-    {
+{
     /// <summary>
     /// Creates a new configuration file. If one exists, it will be deleted
     /// </summary>
