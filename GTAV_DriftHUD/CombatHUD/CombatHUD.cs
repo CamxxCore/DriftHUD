@@ -25,7 +25,7 @@ namespace GTAV_CombatHUD
         public CombatHUD()
         {
             this.Tick += OnTick;
-            _timer = new Timer(100);
+            _timer = new Timer(145);
             _hudText = new List<HUDReward>();
         }
 

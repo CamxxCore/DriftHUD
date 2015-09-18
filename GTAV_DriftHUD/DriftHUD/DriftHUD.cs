@@ -99,10 +99,10 @@ namespace GTAV_DriftHUD
 
                         if (leftVel > 2f && rightVel < -2.1f || rightVel > 2f && leftVel < -2.1f)
                         {
-                            vehicle.ApplyForce(vehicle.Velocity * 0.01f * vehicle.Acceleration);
-                            vehicle.ApplyForce(vehicle.Velocity * -0.006f * vehicle.Acceleration);
-                            vehicle.ApplyForce(vehicle.RightVector * rightVel * 0.01f * vehicle.Acceleration);
-                            vehicle.ApplyForce(vehicle.ForwardVector * forwardVel * 0.0006f * vehicle.Acceleration);
+                            vehicle.ApplyForce(vehicle.Velocity * 0.01f);
+                            vehicle.ApplyForce(vehicle.Velocity * -0.006f);
+                            vehicle.ApplyForce(vehicle.RightVector * rightVel * 0.005f);
+                            vehicle.ApplyForce(vehicle.ForwardVector * forwardVel * 0.001f);
 
                             var stringData = GetStringInfoForMultiplier(multiplier);
 
