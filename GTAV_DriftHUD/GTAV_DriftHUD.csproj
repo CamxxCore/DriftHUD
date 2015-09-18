@@ -63,7 +63,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Structs\UserConfigData.cs" />
+    <Compile Include="Structs\UserConfig.cs" />
     <Compile Include="Timer.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DriftHUD\DriftHUD.cs" />

@@ -1,26 +1,39 @@
 ﻿using System;
 using Ini;
+using System.Reflection;
 using GTAV_DriftHUD.Structs;
 
 namespace GTAV_DriftHUD
 {
     class Config
     {
-        private static IniFile ini = new IniFile("scripts\\GTAV_DriftHUD.ini");
-        public static UserConfigData UserConfig = LoadUserConfig();
+        public static readonly string FilePath = string.Format("scripts\\{0}.ini", Assembly.GetExecutingAssembly().GetName().Name);
 
-        private static UserConfigData LoadUserConfig()
+        private static readonly IniFile IniFile = new IniFile(FilePath);       
+
+        public static void LoadUserConfig(out UserConfig userConfig)
         {
-            var config = new UserConfigData();
-            string path = "scripts\\GTAV_DriftHUD.ini";
+            var config = new UserConfig();
             string value = null;
 
-            if (!System.IO.File.Exists(path))
+            if (!System.IO.File.Exists(FilePath))
                 Helpers.CreateConfig();
 
-            value = Config.ReadValue("General", "EnableSound");
+            value = Config.ReadValue_Safe("General", "DriftPhysics");
+            if (!Boolean.TryParse(value, out config.DriftPhysics))
+                config.DriftPhysics = true;
+
+            value = Config.ReadValue_Safe("General", "EnableSound");
             if (!Boolean.TryParse(value, out config.EnableSound))
                 config.EnableSound = true;
+
+            value = Config.ReadValue_Safe("General", "ReduceVehicles");
+            if (!Boolean.TryParse(value, out config.ReduceVehicles))
+                config.ReduceVehicles = false;
+
+            value = Config.ReadValue_Safe("General", "HighScoreOverlay");
+            if (!Boolean.TryParse(value, out config.HighScoreOverlay))
+                config.HighScoreOverlay = true;
 
             value = Config.ReadValue_Safe("Messages", "Message0");
             if (value.Length < 1)
@@ -52,7 +65,7 @@ namespace GTAV_DriftHUD
                 config.Message5 = "DRIFT KING";
             else config.Message5 = value;
 
-            return config;
+            userConfig = config;
         }
 
         /// <summary>
@@ -83,7 +96,7 @@ namespace GTAV_DriftHUD
         /// <param name="value">The value of the config string</param>
         private static void WriteValue(string section, string key, string value)
         {
-            ini.IniWriteValue(section, key, value);
+            IniFile.IniWriteValue(section, key, value);
         }
 
         /// <summary>
@@ -94,7 +107,7 @@ namespace GTAV_DriftHUD
         /// <returns></returns>
         private static string ReadValue(string section, string key)
         {
-            return ini.IniReadValue(section, key);
+            return IniFile.IniReadValue(section, key);
         }
 
         /// <summary>
@@ -107,7 +120,7 @@ namespace GTAV_DriftHUD
         {
             try
             {
-                return ini.IniReadValue(section, key);
+                return IniFile.IniReadValue(section, key);
             }
 
             catch
@@ -124,31 +137,31 @@ namespace GTAV_DriftHUD
         /// <returns></returns>
         private static T GetConfigSetting<T>(string section, string key)
         {
-            System.Type type = typeof(T);
+            Type type = typeof(T);
 
             if (type == typeof(bool))
             {
-                object setting = Convert.ToBoolean(Config.ReadValue(section, key));
+                object setting = Convert.ToBoolean(ReadValue(section, key));
                 return (T)setting;
             }
             else if (type == typeof(int))
             {
-                object setting = Convert.ToInt32(Config.ReadValue(section, key));
+                object setting = Convert.ToInt32(ReadValue(section, key));
                 return (T)setting;
             }
             else if (type == typeof(uint))
             {
-                object setting = Convert.ToUInt32(Config.ReadValue(section, key));
+                object setting = Convert.ToUInt32(ReadValue(section, key));
                 return (T)setting;
             }
             else if (type == typeof(string))
             {
-                object setting = Config.ReadValue(section, key);
+                object setting = ReadValue(section, key);
                 return (T)setting;
             }
             else if (type == typeof(double))
             {
-                object setting = Convert.ToDouble(Config.ReadValue(section, key));
+                object setting = Convert.ToDouble(ReadValue(section, key));
                 return (T)setting;
             }
             else

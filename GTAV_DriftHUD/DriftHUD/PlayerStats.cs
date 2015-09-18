@@ -14,16 +14,15 @@ namespace GTAV_DriftHUD
 
         public static void WritePlayerStat(VehicleHash hash, int data)
         {
-
             string str = encrypt(string.Format("{0}>{1}", (int)hash, data));
 
             using (var fstream = new FileStream("scripts\\driftstats.stat", FileMode.OpenOrCreate))
             {
                 int seekPos = 0;
+                byte[] buffer = new byte[24];
 
                 while (seekPos < fstream.Length)
                 {
-                    byte[] buffer = new byte[24];
                     fstream.Seek(seekPos, SeekOrigin.Begin);
                     fstream.Read(buffer, 0, 24);
                     var line = decrypt(Encoding.ASCII.GetString(buffer));
@@ -54,10 +53,10 @@ namespace GTAV_DriftHUD
             using (var fstream = new FileStream("scripts\\driftstats.stat", FileMode.OpenOrCreate))
             {
                 int seekPos = 0;
+                byte[] buffer = new byte[24];
 
                 while (seekPos < fstream.Length)
                 {
-                    byte[] buffer = new byte[24];
                     fstream.Seek(seekPos, SeekOrigin.Begin);
                     fstream.Read(buffer, 0, 24);
                     var line = decrypt(Encoding.ASCII.GetString(buffer));
@@ -70,7 +69,6 @@ namespace GTAV_DriftHUD
                 return -1;
             }
         }
-
 
         private static string encrypt(string plainText)
         {

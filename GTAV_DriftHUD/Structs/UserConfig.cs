@@ -1,8 +1,11 @@
 ﻿namespace GTAV_DriftHUD.Structs
 {
-    public struct UserConfigData
+    public struct UserConfig
     {
+        public bool DriftPhysics;
         public bool EnableSound;
+        public bool ReduceVehicles;
+        public bool HighScoreOverlay;
         public string Message0;
         public string Message1;
         public string Message2;
