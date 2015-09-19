@@ -75,7 +75,7 @@ namespace GTAV_CombatHUD
             if (display)
             {
                 int bone = Function.Call<int>(Hash._GET_ENTITY_BONE_INDEX, ent.Handle, "chassis_dummy");
-                _hudText.Add(new HUDReward(text, 100, ent, Function.Call<Vector3>(Hash._GET_ENTITY_BONE_COORDS, ent.Handle, bone) + -ent.ForwardVector + new Vector3(0, 0, 1.25f - ent.HeightAboveGround), mainColor, textColor, GTA.Font.Monospace));
+                _hudText.Add(new HUDReward(text, 100, ent, Function.Call<Vector3>(Hash._GET_ENTITY_BONE_COORDS, ent.Handle, bone) + -ent.ForwardVector + new Vector3(0, 0, 1.25f), mainColor, textColor, GTA.Font.Monospace));
                 _timer.Start();
             }
         }

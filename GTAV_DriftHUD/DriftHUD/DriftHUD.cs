@@ -15,6 +15,8 @@ namespace GTAV_DriftHUD
         /// </summary>
         public readonly UserConfig UserSettings;
 
+        private VehicleHash _currentVehicle;
+        private int _currentVehicleStat;
         private Timer _scaleformDisplayTimer;
         private Timer _scaleformFadeTimer;
         private Scaleform _scaleform;
@@ -66,9 +68,18 @@ namespace GTAV_DriftHUD
                 var hash = (VehicleHash)vehicle.Model.Hash;
                 var multiplier = CombatHUD.Multiplier;
 
-                if (multiplier == lastMultiplier && multiplier > 0 && multiplier > PlayerStats.ReadPlayerStat(hash))
+                if (_currentVehicle == 0 || _currentVehicle != hash)
                 {
-                    PlayerStats.WritePlayerStat(hash, multiplier);
+                    
+                    _currentVehicle = hash;
+                    _currentVehicleStat = PlayerStats.ReadPlayerStat(_currentVehicle);
+                    UI.ShowSubtitle(_currentVehicleStat.ToString());
+                }
+
+                if (multiplier == lastMultiplier && multiplier > 0 && multiplier > _currentVehicleStat)
+                {
+                    _currentVehicleStat = multiplier;
+                    PlayerStats.WritePlayerStat(_currentVehicle, _currentVehicleStat);          
 
                     if (UserSettings.HighScoreOverlay)
                     {
@@ -89,8 +100,7 @@ namespace GTAV_DriftHUD
 
                 if (!Function.Call<bool>(Hash.HAS_ENTITY_COLLIDED_WITH_ANYTHING, vehicle.Handle) && vehicle.Speed > 0.5f && !vehicle.IsInAir)
                 {
-                    var forward = vehicle.ForwardVector;
-                    var forwardVel = Vector3.Dot(vehicle.Velocity, forward);
+                    var forwardVel = Vector3.Dot(vehicle.Velocity, vehicle.ForwardVector);
 
                     if (forwardVel > 0.1f)
                     {
@@ -99,10 +109,13 @@ namespace GTAV_DriftHUD
 
                         if (leftVel > 2f && rightVel < -2.1f || rightVel > 2f && leftVel < -2.1f)
                         {
-                            vehicle.ApplyForce(vehicle.Velocity * 0.01f);
-                            vehicle.ApplyForce(vehicle.Velocity * -0.006f);
-                            vehicle.ApplyForce(vehicle.RightVector * rightVel * 0.005f);
-                            vehicle.ApplyForce(vehicle.ForwardVector * forwardVel * 0.001f);
+                            if (UserSettings.DriftPhysics)
+                            {
+                                vehicle.ApplyForce(vehicle.Velocity * 0.01f);
+                                vehicle.ApplyForce(vehicle.Velocity * -0.006f);
+                                vehicle.ApplyForce(vehicle.RightVector * rightVel * 0.005f);
+                                vehicle.ApplyForce(vehicle.ForwardVector * forwardVel * 0.001f);
+                            }
 
                             var stringData = GetStringInfoForMultiplier(multiplier);
 
@@ -134,20 +147,21 @@ namespace GTAV_DriftHUD
 
         private Tuple<string, Color> GetStringInfoForMultiplier(int multiplier)
         {
-            if (multiplier > 500)
-                return new Tuple<string, Color>(UserSettings.Message5, Color.FromArgb(255, Color.GhostWhite));
-            else if (multiplier > 400)
-                return new Tuple<string, Color>(UserSettings.Message4, Color.FromArgb(255, Color.DarkRed));
-            else if (multiplier > 300)
-                return new Tuple<string, Color>(UserSettings.Message3, Color.FromArgb(250, Color.Red));
-            else if (multiplier > 200)
-                return new Tuple<string, Color>(UserSettings.Message2, Color.FromArgb(255, 245, 110, 0));
-            else if (multiplier > 100)
-                return new Tuple<string, Color>(UserSettings.Message1, Color.FromArgb(255, Color.BlueViolet));
-            else if (multiplier > 50)
-                return new Tuple<string, Color>(UserSettings.Message0, Color.FromArgb(255, Color.Gold));
-            else
+            if (multiplier <= 50)
                 return new Tuple<string, Color>(null, Color.Gold);
+            else if (multiplier <= 100)
+                return new Tuple<string, Color>(UserSettings.Message1, Color.FromArgb(255, Color.BlueViolet));
+            else if (multiplier <= 200)
+                return new Tuple<string, Color>(UserSettings.Message2, Color.FromArgb(255, 245, 110, 0));
+            else if (multiplier <= 300)
+                return new Tuple<string, Color>(UserSettings.Message3, Color.FromArgb(250, Color.Red));
+            else if (multiplier <= 400)
+                return new Tuple<string, Color>(UserSettings.Message4, Color.FromArgb(255, Color.DarkRed));
+            else if (multiplier <= 500)
+                return new Tuple<string, Color>(UserSettings.Message5, Color.FromArgb(255, Color.GhostWhite));
+            else
+                return new Tuple<string, Color>(UserSettings.Message0, Color.Gold);
+
         }
     }
 }
