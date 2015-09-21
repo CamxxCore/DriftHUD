@@ -2,10 +2,11 @@
 using GTA;
 using GTA.Math;
 using GTA.Native;
+using Font = GTA.Font;
 
-namespace GTAV_CombatHUD
+namespace GTAV_DriftHUD
 {
-    public class HUDReward
+    public class HUDText
     {
         private string text;
         private int value;
@@ -47,7 +48,7 @@ namespace GTAV_CombatHUD
 
         #endregion
 
-        public HUDReward(string text, int value, Entity ent, Vector3 position, Color mainColor, Color textColor, GTA.Font font = GTA.Font.Monospace, Vector3? startOffset = null)
+        public HUDText(string text, int value, Entity ent, Vector3 position, Color mainColor, Color textColor, GTA.Font font = GTA.Font.Monospace, Vector3? startOffset = null)
         {
             this.text = text;
             this.value = value;
@@ -57,19 +58,11 @@ namespace GTAV_CombatHUD
             this.textColor = textColor;
             this.font = font;
             this.startOffset = startOffset;
-            this.moveOffset = GetMovementOffset();
+            this.moveOffset = new PointF(0.0f, 0.005f);
             this.displayTimer = new Timer(100);
             this.fadeTimer = new Timer(1000);
             this.display = true;
             displayTimer.Start();
-        }
-
-        internal PointF GetMovementOffset()
-        { 
-            var offset = new PointF();
-            offset.Y = (float)0.005;
-            offset.X = (float)0.0f;
-            return offset;
         }
 
         public void UpdateStatus(out bool exists)
@@ -117,7 +110,7 @@ namespace GTAV_CombatHUD
 
             if (text != null)
             {
-                uiText = new UIText(text, new Point(0, 29), 0.66F, textColor, GTA.Font.ChaletComprimeCologne, false);
+                uiText = new UIText(text, new Point(0, 29), 0.66F, textColor, Font.ChaletComprimeCologne, false);
                 uiText.Draw();
             }
 

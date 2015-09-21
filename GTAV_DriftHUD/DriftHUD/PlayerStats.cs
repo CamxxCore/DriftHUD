@@ -2,6 +2,7 @@
 using System.Text;
 using System.IO;
 using GTA.Native;
+using System.Threading.Tasks;
 using System.Security.Cryptography;
 
 namespace GTAV_DriftHUD
@@ -48,7 +49,7 @@ namespace GTAV_DriftHUD
             }
         }
 
-        public static int ReadPlayerStat(VehicleHash hash)
+        public static async Task<int> ReadPlayerStat(VehicleHash hash)
         {
             using (var fstream = new FileStream("scripts\\driftstats.stat", FileMode.OpenOrCreate))
             {
@@ -58,7 +59,7 @@ namespace GTAV_DriftHUD
                 while (seekPos < fstream.Length)
                 {
                     fstream.Seek(seekPos, SeekOrigin.Begin);
-                    fstream.Read(buffer, 0, 24);
+                    await fstream.ReadAsync(buffer, 0, 24);
                     var line = decrypt(Encoding.ASCII.GetString(buffer));
                     var keyVal = line.Substring(0, line.IndexOf('>'));
                     var value = line.Substring(line.IndexOf('>') + 1);

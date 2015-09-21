@@ -67,8 +67,8 @@
     <Compile Include="Timer.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="DriftHUD\DriftHUD.cs" />
-    <Compile Include="CombatHUD\CombatHUD.cs" />
-    <Compile Include="CombatHUD\HUDReward.cs" />
+    <Compile Include="DriftHUD\HUD\ActiveTextMonitor.cs" />
+    <Compile Include="DriftHUD\HUD\HUDText.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

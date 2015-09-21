@@ -9,7 +9,7 @@ namespace GTAV_DriftHUD
     {
         public static readonly string FilePath = string.Format("scripts\\{0}.ini", Assembly.GetExecutingAssembly().GetName().Name);
 
-        private static readonly IniFile IniFile = new IniFile(FilePath);       
+        private static readonly IniFile IniFile = new IniFile(FilePath);
 
         public static void LoadUserConfig(out UserConfig userConfig)
         {
@@ -22,6 +22,13 @@ namespace GTAV_DriftHUD
             value = Config.ReadValue_Safe("General", "DriftPhysics");
             if (!Boolean.TryParse(value, out config.DriftPhysics))
                 config.DriftPhysics = true;
+
+
+            value = Config.ReadValue_Safe("General", "DriftIntensity");
+            if (!float.TryParse(value, out config.DriftIntensity))
+                config.DriftIntensity = 1f;
+            else
+                config.DriftIntensity = config.DriftIntensity > 2.0f ? 2.0f : config.DriftIntensity < 0.0f ? 0.0f : config.DriftIntensity;
 
             value = Config.ReadValue_Safe("General", "EnableSound");
             if (!Boolean.TryParse(value, out config.EnableSound))

@@ -3,6 +3,7 @@
     public struct UserConfig
     {
         public bool DriftPhysics;
+        public float DriftIntensity;
         public bool EnableSound;
         public bool ReduceVehicles;
         public bool HighScoreOverlay;
