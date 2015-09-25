@@ -3,6 +3,7 @@ using GTA;
 using GTA.Math;
 using GTA.Native;
 using System.Drawing;
+using System.Linq;
 using GTAV_DriftHUD.Structs;
 
 namespace GTAV_DriftHUD
@@ -73,7 +74,7 @@ namespace GTAV_DriftHUD
                     _currentVehicleStat = PlayerStats.ReadPlayerStat(_currentVehicle).Result;
                 }
 
-                if (multiplier > 0 && multiplier == lastMultiplier && multiplier > _currentVehicleStat)
+                if (multiplier > 49 && multiplier == lastMultiplier && multiplier > _currentVehicleStat)
                 {
                     _currentVehicleStat = multiplier;
                     PlayerStats.WritePlayerStat(_currentVehicle, _currentVehicleStat);
@@ -97,8 +98,12 @@ namespace GTAV_DriftHUD
                 }
 
                 var forwardVel = Vector3.Dot(vehicle.Velocity, vehicle.ForwardVector);
+                var pos = vehicle.Position;
 
-                if (forwardVel > -1f)
+
+                if (Function.Call<bool>(Hash.IS_POINT_ON_ROAD, pos.X, pos.Y, pos.Z) || 
+                    new string[] {"Fort Zancudo", "Vespucci Beach", "Paleto Cove", "Los Santos International Airport" }.Contains(World.GetZoneName(new Vector2(pos.X, pos.Y))) &&
+                    forwardVel > -10.0f)
                 {
                     var leftVel = Vector3.Dot(vehicle.Velocity, -vehicle.RightVector);
                     var rightVel = Vector3.Dot(vehicle.Velocity, vehicle.RightVector);
@@ -110,7 +115,6 @@ namespace GTAV_DriftHUD
                             if (UserSettings.DriftPhysics)
                             {
                                 var scale = UserSettings.DriftIntensity;
-
                                 vehicle.ApplyForce(vehicle.Velocity * 0.01f);
                                 vehicle.ApplyForce(vehicle.Velocity * -0.006f);
                                 vehicle.ApplyForce(vehicle.RightVector * rightVel * 0.005f * scale);
@@ -119,26 +123,34 @@ namespace GTAV_DriftHUD
 
                             var stringData = GetStringInfoForMultiplier(multiplier);
 
-                            if (multiplier > 0 && tempString != stringData.Item1)
+                            if (multiplier > 49)
                             {
-                                Function.Call(Hash.PLAY_SOUND_FRONTEND, -1, "FocusOut", "HintCamSounds", 1);
-                                tempString = stringData.Item1;
-                            }
-
-                            var display = (multiplier > 5);
-
-                            if (display && UserSettings.EnableSound)
-                            {
-                                if (soundFlag < 4) soundFlag++;
-                                if (soundFlag == 4)
+                                if (tempString != stringData.Item1)
                                 {
-                                    Function.Call(Hash.PLAY_SOUND_FRONTEND, -1, "TIMER", "HUD_FRONTEND_DEFAULT_SOUNDSET", 1);
-                                    soundFlag = 0;
+                                    Function.Call(Hash.PLAY_SOUND_FRONTEND, -1, "FocusOut", "HintCamSounds", 1);
+                                    tempString = stringData.Item1;
                                 }
+
+                                if (UserSettings.EnableSound)
+                                {
+                                    if (soundFlag < 4) soundFlag++;
+                                    if (soundFlag == 4)
+                                    {
+                                        Function.Call(Hash.PLAY_SOUND_FRONTEND, -1, "TIMER", "HUD_FRONTEND_DEFAULT_SOUNDSET", 1);
+                                        soundFlag = 0;
+                                    }
+                                }
+
+                                var interp = multiplier > 300 ? 1f : multiplier > 200 ? (double)(multiplier - 200) / 100 : 0d;
+                                ActiveTextMonitor.AddActiveReward(stringData.Item1, Color.Gold.Interpolate(Color.Red, interp), stringData.Item2, vehicle, true);
                             }
 
-                            var interp = multiplier > 300 ? 1f : multiplier > 200 ? (double)(multiplier - 200) / 100 : 0d;
-                            ActiveTextMonitor.AddActiveReward(stringData.Item1, Color.Gold.Interpolate(Color.Red, interp), stringData.Item2, vehicle, display);
+                            else
+                            {
+                                ActiveTextMonitor.AddActiveReward(stringData.Item1, Color.Gold, stringData.Item2, vehicle, false);
+                            }
+
+                       
                         }
                     }
                 }
@@ -149,18 +161,18 @@ namespace GTAV_DriftHUD
 
         private Tuple<string, Color> GetStringInfoForMultiplier(int multiplier)
         {
-            if (multiplier > 500)
-                return new Tuple<string, Color>(UserSettings.Message5, Color.FromArgb(255, Color.GhostWhite));
-            else if (multiplier > 400)
-                return new Tuple<string, Color>(UserSettings.Message4, Color.FromArgb(255, Color.DarkRed));
+            if (multiplier > 400)
+                return new Tuple<string, Color>(UserSettings.Message5, Color.GhostWhite);
             else if (multiplier > 300)
-                return new Tuple<string, Color>(UserSettings.Message3, Color.FromArgb(255, Color.Red));
+                return new Tuple<string, Color>(UserSettings.Message4, Color.Firebrick);
             else if (multiplier > 200)
-                return new Tuple<string, Color>(UserSettings.Message2, Color.FromArgb(255, 245, 110, 0));
+                return new Tuple<string, Color>(UserSettings.Message3, Color.DarkRed);
+            else if (multiplier > 150)
+                return new Tuple<string, Color>(UserSettings.Message2, Color.Red);
             else if (multiplier > 100)
-                return new Tuple<string, Color>(UserSettings.Message1, Color.FromArgb(255, 255, 204, 0));
+                return new Tuple<string, Color>(UserSettings.Message1, Color.BlueViolet);
             else if (multiplier > 50)
-                return new Tuple<string, Color>(UserSettings.Message0, Color.FromArgb(255, Color.Gold));
+                return new Tuple<string, Color>(UserSettings.Message0, Color.Gold);
             else
                 return new Tuple<string, Color>(null, Color.Gold);
         }
