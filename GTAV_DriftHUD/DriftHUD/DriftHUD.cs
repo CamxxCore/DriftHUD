@@ -14,11 +14,11 @@ namespace GTAV_DriftHUD
         /// User INI configuration
         /// </summary>
         public readonly UserConfig UserSettings;
-
         private VehicleHash _currentVehicle;
         private int _currentVehicleStat;
         private Timer _scaleformDisplayTimer;
         private Timer _scaleformFadeTimer;
+        private Timer _msgTimer;
         private Scaleform _scaleform;
 
         public DriftHUD()
@@ -26,10 +26,12 @@ namespace GTAV_DriftHUD
             this.Tick += OnTick;
             this._scaleformDisplayTimer = new Timer(1200);
             this._scaleformFadeTimer = new Timer(2000);
+            this._msgTimer = new Timer(5000);
             this._scaleform = new Scaleform(Function.Call<int>(Hash.REQUEST_SCALEFORM_MOVIE, "MP_BIG_MESSAGE_FREEMODE"));
             Config.LoadUserConfig(out UserSettings);
         }
 
+        int msgHandle;
         string tempString = null;
         int lastMultiplier;
         int soundFlag;
@@ -38,6 +40,12 @@ namespace GTAV_DriftHUD
         {
             if (UserSettings.ReduceVehicles)
                 Function.Call(Hash.SET_VEHICLE_DENSITY_MULTIPLIER_THIS_FRAME, 0.3f);
+
+            if (_msgTimer.Enabled && Game.GameTime > _msgTimer.Waiter)
+            {
+                Function.Call(Hash._REMOVE_NOTIFICATION, msgHandle);
+                _msgTimer.Enabled = false;
+            }
 
             if (_scaleformDisplayTimer.Enabled)
             {
@@ -82,28 +90,36 @@ namespace GTAV_DriftHUD
                     if (UserSettings.HighScoreOverlay)
                     {
                         if (UserSettings.EnableSound)
+                        {
                             Function.Call(Hash.PLAY_MISSION_COMPLETE_AUDIO, "MICHAEL_BIG_01");
-                        Script.Wait(1550);
+                            Script.Wait(1550);
+                        }
+
                         _scaleform.CallFunction("SHOW_MISSION_PASSED_MESSAGE", string.Format("x{0} Drift\n~w~{1} * New Record!", multiplier * 100, vehicle.FriendlyName), "", 100, true, 0, true);
                         _scaleformDisplayTimer.Start();
                     }
 
                     else
                     {
+                        if (UserSettings.EnableSound)
+                        {
+                            Function.Call(Hash.PLAY_SOUND_FRONTEND, -1, "Notification", "Phone_SoundSet_Default", 1);
+                        }
+
                         Function.Call(Hash._SET_NOTIFICATION_TEXT_ENTRY, "STRING");
-                        Function.Call(Hash._ADD_TEXT_COMPONENT_STRING, string.Format("~w~Vehicle: ~y~{1}\n~w~Score: ~y~{0}", multiplier * 100, vehicle.FriendlyName));
-                        Function.Call(Hash._SET_NOTIFICATION_MESSAGE, "CHAR_ALL_PLAYERS_CONF", "CHAR_ALL_PLAYERS_CONF", false, 4, " Drifting", " ~c~New Record!");
+                        Function.Call(Hash._ADD_TEXT_COMPONENT_STRING, string.Format("~s~Vehicle: ~y~{1}\n~s~Score: ~y~{0}", multiplier * 100, vehicle.FriendlyName));
+                        msgHandle = Function.Call<int>(Hash._SET_NOTIFICATION_MESSAGE, "CHAR_ALL_PLAYERS_CONF", "CHAR_ALL_PLAYERS_CONF", false, 4, " Drifting", " ~c~New Record!");
                         Function.Call(Hash._DRAW_NOTIFICATION, false, true);
+                        _msgTimer.Start();
                     }
                 }
 
                 var forwardVel = Vector3.Dot(vehicle.Velocity, vehicle.ForwardVector);
                 var pos = vehicle.Position;
 
-
-                if (Function.Call<bool>(Hash.IS_POINT_ON_ROAD, pos.X, pos.Y, pos.Z) || 
-                    new string[] {"Fort Zancudo", "Vespucci Beach", "Paleto Cove", "Los Santos International Airport" }.Contains(World.GetZoneName(new Vector2(pos.X, pos.Y))) &&
-                    forwardVel > -10.0f)
+                if (/*Function.Call<bool>(Hash.IS_POINT_ON_ROAD, pos.X, pos.Y, pos.Z) || */
+                 //   new string[] {"Fort Zancudo", "Vespucci Beach", "Paleto Cove", "Los Santos International Airport" }.Contains(World.GetZoneName(new Vector2(pos.X, pos.Y))) &&
+                    forwardVel > -5.0f)
                 {
                     var leftVel = Vector3.Dot(vehicle.Velocity, -vehicle.RightVector);
                     var rightVel = Vector3.Dot(vehicle.Velocity, vehicle.RightVector);
@@ -115,15 +131,15 @@ namespace GTAV_DriftHUD
                             if (UserSettings.DriftPhysics)
                             {
                                 var scale = UserSettings.DriftIntensity;
-                                vehicle.ApplyForce(vehicle.Velocity * 0.01f);
-                                vehicle.ApplyForce(vehicle.Velocity * -0.006f);
-                                vehicle.ApplyForce(vehicle.RightVector * rightVel * 0.005f * scale);
+                                vehicle.ApplyForce(vehicle.Velocity * 0.01f * scale);
+                                vehicle.ApplyForce(vehicle.Velocity * -0.005f * scale);
+                           //     vehicle.ApplyForce(vehicle.RightVector * rightVel * 0.005f * scale);
                                 vehicle.ApplyForce(vehicle.ForwardVector * forwardVel * 0.001f * scale);
                             }
 
                             var stringData = GetStringInfoForMultiplier(multiplier);
 
-                            if (multiplier > 49)
+                            if (multiplier > 19)
                             {
                                 if (tempString != stringData.Item1)
                                 {
@@ -150,7 +166,7 @@ namespace GTAV_DriftHUD
                                 ActiveTextMonitor.AddActiveReward(stringData.Item1, Color.Gold, stringData.Item2, vehicle, false);
                             }
 
-                       
+                  
                         }
                     }
                 }
@@ -161,18 +177,20 @@ namespace GTAV_DriftHUD
 
         private Tuple<string, Color> GetStringInfoForMultiplier(int multiplier)
         {
-            if (multiplier > 400)
+            if (multiplier > 700)
+                return new Tuple<string, Color>(UserSettings.Message6, Color.Gold);
+            if (multiplier > 600)
                 return new Tuple<string, Color>(UserSettings.Message5, Color.GhostWhite);
-            else if (multiplier > 300)
+            else if (multiplier > 500)
                 return new Tuple<string, Color>(UserSettings.Message4, Color.Firebrick);
-            else if (multiplier > 200)
+            else if (multiplier > 400)
                 return new Tuple<string, Color>(UserSettings.Message3, Color.DarkRed);
-            else if (multiplier > 150)
+            else if (multiplier > 300)
                 return new Tuple<string, Color>(UserSettings.Message2, Color.Red);
+            else if (multiplier > 200)
+                return new Tuple<string, Color>(UserSettings.Message1, Color.Orange);
             else if (multiplier > 100)
-                return new Tuple<string, Color>(UserSettings.Message1, Color.BlueViolet);
-            else if (multiplier > 50)
-                return new Tuple<string, Color>(UserSettings.Message0, Color.Gold);
+                return new Tuple<string, Color>(UserSettings.Message0, Color.Gold.Interpolate(Color.Red, 0.0f));
             else
                 return new Tuple<string, Color>(null, Color.Gold);
         }

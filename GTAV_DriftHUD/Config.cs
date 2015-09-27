@@ -54,23 +54,28 @@ namespace GTAV_DriftHUD
 
             value = Config.ReadValue_Safe("Messages", "Message2");
             if (value.Length < 1)
-                config.Message2 = "Amazing!";
+                config.Message2 = "Wicked!";
             else config.Message2 = value;
 
             value = Config.ReadValue_Safe("Messages", "Message3");
             if (value.Length < 1)
-                config.Message3 = "Insane!";
+                config.Message3 = "Impressive!";
             else config.Message3 = value;
 
             value = Config.ReadValue_Safe("Messages", "Message4");
             if (value.Length < 1)
-                config.Message4 = "Impossible!";
+                config.Message4 = "Phenomenal!";
             else config.Message4 = value;
 
             value = Config.ReadValue_Safe("Messages", "Message5");
             if (value.Length < 1)
-                config.Message5 = "DRIFT KING";
+                config.Message5 = "Insane!";
             else config.Message5 = value;
+
+            value = Config.ReadValue_Safe("Messages", "Message6");
+            if (value.Length < 1)
+                config.Message6 = "DRIFT KING!";
+            else config.Message6 = value;
 
             userConfig = config;
         }

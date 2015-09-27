@@ -13,7 +13,7 @@ namespace GTAV_DriftHUD
         static readonly string Salt = "Dolth0ay44";
         static readonly string VIKey = "@pQsQDF6vpfJA84A";
 
-        public static void WritePlayerStat(VehicleHash hash, int data)
+        public static async void WritePlayerStat(VehicleHash hash, int data)
         {
             string str = encrypt(string.Format("{0}>{1}", (int)hash, data));
 
@@ -25,7 +25,7 @@ namespace GTAV_DriftHUD
                 while (seekPos < fstream.Length)
                 {
                     fstream.Seek(seekPos, SeekOrigin.Begin);
-                    fstream.Read(buffer, 0, 24);
+                    await fstream.ReadAsync(buffer, 0, 24);
                     var line = decrypt(Encoding.ASCII.GetString(buffer));
                     var keyVal = line.Substring(0, line.IndexOf('>'));
                     var value = line.Substring(line.IndexOf('>') + 1);

@@ -26,7 +26,7 @@ namespace GTAV_DriftHUD
         public ActiveTextMonitor()
         {
             this.Tick += OnTick;
-            _timer = new Timer(150);
+            _timer = new Timer(155);
             _hudText = new List<HUDText>();
         }
 

@@ -13,5 +13,6 @@
         public string Message3;
         public string Message4;
         public string Message5;
+        public string Message6;
     }
 }
